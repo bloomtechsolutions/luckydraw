@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { deleteRegistration } from "@/app/admin/actions";
 import ConfirmButton from "./ConfirmButton";
 
-export type RegRow = { id: string; no: number; staffId: string; name: string; department: string; registeredAt: string; won?: string };
+export type RegRow = { id: string; no: number; staffId: string; name: string; department: string; registeredAt: string; won?: string; flags?: string[] };
 type SortKey = "no" | "staffId" | "name" | "department";
 
 export default function RegistrationsTable({ rows }: { rows: RegRow[] }) {
@@ -60,6 +60,9 @@ export default function RegistrationsTable({ rows }: { rows: RegRow[] }) {
                 <td className="px-3 py-2">
                   {r.name}
                   {r.won && <span className="badge ml-2 bg-amber-100 text-amber-800">🏆 {r.won}</span>}
+                  {r.flags?.length ? (
+                    <span title={r.flags.join("\n")} className="badge ml-2 cursor-help bg-rose-100 text-rose-700">⚠ Check</span>
+                  ) : null}
                 </td>
                 <td className="px-3 py-2 text-slate-600">{r.department}</td>
                 <td className="px-3 py-2 whitespace-nowrap text-slate-500">{r.registeredAt}</td>

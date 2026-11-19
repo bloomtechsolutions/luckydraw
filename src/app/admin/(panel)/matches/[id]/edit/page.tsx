@@ -24,6 +24,7 @@ export default async function EditMatch({ params }: { params: Promise<{ id: stri
           regOpensAt: m.regOpensAt.toISOString(),
           regClosesAt: m.regClosesAt.toISOString(),
           rotatingQr: m.rotatingQr,
+          onePerDevice: m.onePerDevice,
           status: m.status,
         }}
       />

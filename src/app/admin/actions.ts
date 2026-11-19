@@ -75,6 +75,7 @@ function parseMatchForm(formData: FormData) {
     regOpensAt: date("regOpensAt"),
     regClosesAt: date("regClosesAt"),
     rotatingQr: formData.get("rotatingQr") === "on",
+    onePerDevice: formData.get("onePerDevice") === "on",
     status: (["DRAFT", "OPEN", "CLOSED"] as const).includes(status) ? status : "DRAFT",
   };
 }

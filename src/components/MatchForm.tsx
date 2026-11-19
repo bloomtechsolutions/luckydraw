@@ -11,6 +11,7 @@ type Defaults = {
   regOpensAt?: string;
   regClosesAt?: string;
   rotatingQr?: boolean;
+  onePerDevice?: boolean;
   status?: string;
 };
 
@@ -131,6 +132,14 @@ export default function MatchForm({
           </span>
         </label>
       </div>
+
+      <label className="flex items-start gap-3 rounded-xl p-2">
+        <input type="checkbox" name="onePerDevice" defaultChecked={defaults.onePerDevice ?? true} className="mt-1 h-4 w-4 accent-brand-600" />
+        <span>
+          <span className="block text-sm font-medium">One registration per phone</span>
+          <span className="block text-xs text-slate-500">Stops one person entering several colleagues&apos; staff IDs from their own phone.</span>
+        </span>
+      </label>
 
       <button className="btn-primary" disabled={pending}>{pending ? "Saving…" : submitLabel}</button>
     </form>

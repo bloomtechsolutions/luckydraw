@@ -41,6 +41,8 @@ model Match {
   qrSecret      String
   /// When true the QR shown at the venue changes every minute.
   rotatingQr    Boolean       @default(true)
+  /// When true each phone/browser can register only one staff member for this match.
+  onePerDevice  Boolean       @default(true)
   createdAt     DateTime      @default(now())
   registrations Registration[]
   prizes        Prize[]
@@ -57,11 +59,14 @@ model Registration {
   staffId    String
   name       String
   department String
+  /// Anonymous random ID of the phone/browser that submitted the entry (cookie), used to spot one person entering several IDs.
+  deviceId   String?
   createdAt  DateTime @default(now())
   winners    Winner[]
 
   @@unique([matchId, staffId])
   @@index([staffId])
+  @@index([matchId, deviceId])
 }
 
 model Prize {

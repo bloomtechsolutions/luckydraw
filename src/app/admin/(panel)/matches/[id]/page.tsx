@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { fmtDateTime } from "@/lib/format";
 import { matchLabel, registrationState } from "@/lib/match";
 import { departmentBreakdown, timeline } from "@/lib/stats";
+import { duplicateReport } from "@/lib/duplicates";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import ConfirmButton from "@/components/ConfirmButton";
@@ -13,7 +14,7 @@ import RegistrationsTable from "@/components/RegistrationsTable";
 import { ColumnBars, HorizontalBars } from "@/components/Charts";
 import CopyButton from "@/components/CopyButton";
 import { displayKey } from "@/lib/tokens";
-import { addPrize, deleteMatch, deletePrize, deleteWinner, rotateQrSecret, setMatchStatus } from "../../../actions";
+import { addPrize, deleteMatch, deletePrize, deleteRegistration, deleteWinner, rotateQrSecret, setMatchStatus } from "../../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const validWinners = m.winners.filter((w) => w.status === "VALID");
   const wonBy = new Map(validWinners.map((w) => [w.registrationId, w.prize.name]));
   const depts = tab === "stats" ? await departmentBreakdown({ matchId: m.id }) : [];
+  const dups = await duplicateReport(m.id);
   const h = await headers();
   const origin = process.env.APP_URL?.replace(/\/$/, "") || `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
   const screenUrl = `${origin}/screen/${m.code}?k=${displayKey(m)}`;
@@ -105,6 +107,33 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         ))}
       </nav>
 
+      {tab === "registrations" && dups.groups.length > 0 && (
+        <section className="card overflow-hidden ring-rose-200">
+          <div className="flex items-center gap-2 border-b border-rose-100 bg-rose-50 px-5 py-3">
+            <span className="text-lg">⚠️</span>
+            <h2 className="font-bold text-rose-800">Possible duplicates ({dups.groups.length})</h2>
+            <span className="text-sm text-rose-700/80">Review these and remove any entries that shouldn&apos;t count.</span>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {dups.groups.map((g, i) => (
+              <li key={i} className="px-5 py-3">
+                <div className="text-sm font-semibold">{g.title}</div>
+                <div className="text-xs text-slate-500">{g.detail}</div>
+                <ul className="mt-2 space-y-1">
+                  {g.regs.map((r) => (
+                    <li key={r.id} className="flex items-center gap-3 text-sm">
+                      <span className="w-24 shrink-0 font-mono font-medium">{r.staffId}</span>
+                      <span className="min-w-0 flex-1 truncate">{r.name} <span className="text-slate-500">· {r.department} · {fmtDateTime(r.createdAt)}</span></span>
+                      <ConfirmButton action={deleteRegistration.bind(null, r.id)} confirm={`Remove ${r.name} (${r.staffId}) from this match?`}>Remove</ConfirmButton>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {tab === "registrations" && (
         <section className="card overflow-hidden">
           <RegistrationsTable
@@ -116,6 +145,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               department: r.department,
               registeredAt: fmtDateTime(r.createdAt),
               won: wonBy.get(r.id),
+              flags: dups.flagged.get(r.id),
             }))}
           />
         </section>

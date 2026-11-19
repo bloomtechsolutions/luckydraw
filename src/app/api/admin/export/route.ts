@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { guard } from "@/lib/api";
 import { fmtDateTime } from "@/lib/format";
 import { matchLabel } from "@/lib/match";
+import { duplicateReport } from "@/lib/duplicates";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,8 @@ export async function GET(req: Request) {
   if (matches.length === 0 && !competitionId) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const multi = !matchId;
+  const flags = new Map<string, string[]>();
+  for (const m of matches) for (const [id, f] of (await duplicateReport(m.id)).flagged) flags.set(id, f);
   const regs: Row[] = matches.flatMap((m) =>
     m.registrations.map((r, i) => ({
       ...(multi ? { Match: matchLabel(m), "Match date": fmtDateTime(m.startsAt) } : {}),
@@ -63,6 +66,7 @@ export async function GET(req: Request) {
       Name: r.name,
       Department: r.department,
       "Registered at": fmtDateTime(r.createdAt),
+      Check: (flags.get(r.id) ?? []).join("; "),
     })),
   );
   const winners: Row[] = matches.flatMap((m) =>

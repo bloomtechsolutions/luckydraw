@@ -91,7 +91,7 @@ export default function LiveQr({ endpoint, poster }: { endpoint: string; poster:
         <div className="flex items-center gap-3 rounded-full bg-white/10 px-5 py-2 ring-1 ring-white/15">
           <span className="text-2xl">🙌</span>
           <strong key={bump} className={`inline-block text-3xl font-black tabular-nums ${bump ? "animate-bump" : ""}`}>{data.count}</strong>
-          <span className="text-lg text-white/80">supporters in the draw</span>
+          <span className="text-lg text-white/80">{data.count === 1 ? "supporter" : "supporters"} in the draw</span>
         </div>
       </div>
       {error && <p className="mt-3 text-sm text-amber-300">{error}</p>}
