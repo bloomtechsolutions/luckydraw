@@ -6,7 +6,7 @@ import { login } from "../actions";
 export default function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(login, {});
   return (
-    <form action={action} className="card space-y-4 p-6">
+    <form action={action} className="card space-y-4 p-6 text-slate-900">
       <input type="hidden" name="next" value={next} />
       <div>
         <label htmlFor="password" className="label">Admin password</label>

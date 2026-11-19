@@ -1,14 +1,15 @@
 import LoginForm from "./LoginForm";
+import Logo from "@/components/Logo";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4">
+    <main className="bg-stadium flex min-h-dvh flex-col justify-center px-4"><div className="mx-auto w-full max-w-sm">
       <div className="mb-6 text-center">
-        <div className="text-5xl">🎡</div>
-        <h1 className="mt-3 text-2xl font-extrabold">Lucky Draw Admin</h1>
+        <Logo variant="full" className="animate-float mx-auto h-36 w-auto text-white" />
+        <h1 className="mt-5 text-2xl font-extrabold">Lucky Draw Admin</h1>
       </div>
       <LoginForm next={next ?? "/admin"} />
-    </main>
+    </div></main>
   );
 }

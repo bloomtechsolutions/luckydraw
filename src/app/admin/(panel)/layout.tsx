@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { logout } from "../actions";
+import Logo from "@/components/Logo";
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,7 +8,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
           <Link href="/admin" className="flex items-center gap-2 font-extrabold">
-            <span className="text-xl">🎡</span> <span>Lucky Draw</span>
+            <Logo variant="mark" className="h-8 w-auto text-brand-700" /> <span>Lucky Draw</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm">
             <Link href="/admin" className="rounded-lg px-2.5 py-1.5 text-slate-600 hover:bg-slate-100">Dashboard</Link>

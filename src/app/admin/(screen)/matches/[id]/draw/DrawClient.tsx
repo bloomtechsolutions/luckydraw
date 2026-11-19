@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import Wheel, { type Segment, type WheelHandle } from "@/components/Wheel";
+import Logo from "@/components/Logo";
 
 type Prize = { id: string; name: string; quantity: number; drawn: number };
 type WinnerInfo = { id: string; registrationId: string; name: string; staffId: string; department: string; prize: string; prizeId: string };
@@ -108,23 +109,27 @@ export default function DrawClient({
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-700 via-brand-900 to-slate-950 text-white">
-      <div className="flex items-center gap-3 px-4 py-3 text-sm text-brand-100">
+    <div className="bg-stadium relative min-h-dvh overflow-hidden">
+      <div className="orb -top-32 -left-32 h-[28rem] w-[28rem] bg-brand-500/35" />
+      <div className="orb -right-40 -bottom-40 h-[30rem] w-[30rem] bg-pink-500/20 [animation-delay:-6s]" />
+      <div className="relative flex items-center gap-3 px-4 py-3 text-sm text-white/70">
         <Link href={`/admin/matches/${matchId}`} className="hover:text-white">← Back</Link>
+        <span className="ml-auto flex items-center gap-2 font-bold tracking-widest text-white/80 uppercase"><Logo variant="mark" className="h-7 w-auto text-white" /> United BML</span>
         <span className="ml-auto" />
         <button onClick={() => setSound((s) => !s)} className="rounded-lg px-2 py-1 hover:bg-white/10">{sound ? "🔊" : "🔇"}</button>
         <button onClick={fullscreen} className="rounded-lg px-2 py-1 hover:bg-white/10">⛶ Fullscreen</button>
       </div>
 
-      <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 pb-10 lg:grid-cols-[1fr_380px]">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 pb-10 lg:grid-cols-[1fr_380px]">
         <div className="mx-auto w-full max-w-[min(82vh,100%)]">
           <Wheel ref={wheel} segments={segments} sound={sound} />
         </div>
 
         <aside className="space-y-5">
           <div>
-            <div className="text-sm font-semibold tracking-widest text-brand-100 uppercase">{subtitle}</div>
+            <div className="text-sm font-semibold tracking-widest text-gold-300 uppercase">{subtitle}</div>
             <h1 className="text-3xl font-black">{title}</h1>
+            <div className="text-gold-gradient text-xl font-black tracking-wide uppercase">Lucky Draw</div>
             <p className="mt-1 text-brand-100">
               <strong className="text-white">{poolSize}</strong> eligible participant{poolSize === 1 ? "" : "s"}
               {poolSize > segments.length && segments.length > 0 && <span className="block text-xs opacity-80">Wheel shows {segments.length} random names. Everyone has an equal chance.</span>}
@@ -187,8 +192,12 @@ export default function DrawClient({
 
       {result && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-3xl bg-white p-8 text-center text-slate-900 shadow-2xl">
-            <div className="text-sm font-bold tracking-widest text-brand-600 uppercase">🎉 Congratulations! 🎉</div>
+          <div className="animate-pop w-full max-w-xl overflow-hidden rounded-3xl bg-white text-center text-slate-900 shadow-2xl">
+            <div className="flex items-center justify-center gap-3 bg-gradient-to-r from-brand-600 to-brand-900 px-6 py-4 text-white">
+              <Logo variant="mark" className="h-10 w-auto text-white" />
+              <div className="text-gold-gradient text-xl font-black tracking-widest uppercase">Congratulations!</div>
+            </div>
+            <div className="p-8 pt-6">
             <div className="mt-4 text-5xl leading-tight font-black break-words sm:text-6xl">{result.name}</div>
             <div className="mt-3 font-mono text-2xl font-bold text-slate-600">{result.staffId}</div>
             <div className="text-lg text-slate-500">{result.department}</div>
@@ -196,6 +205,7 @@ export default function DrawClient({
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <button onClick={redraw} className="btn-secondary py-3 text-base">Absent: re-draw</button>
               <button onClick={closeResult} autoFocus className="btn-primary py-3 text-base">Confirm winner ✓</button>
+            </div>
             </div>
           </div>
         </div>

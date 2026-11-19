@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { fmtDateTime } from "@/lib/format";
 import LiveQr from "@/components/LiveQr";
 import VenueScreen from "@/components/VenueScreen";
+import Logo from "@/components/Logo";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export default async function QrScreen({ params, searchParams }: { params: Promi
     return (
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center bg-white p-8 text-center text-slate-900 print:p-0">
         <PrintButton />
+        <Logo variant="full" className="mb-6 h-32 w-auto text-brand-700" />
         <div className="text-lg font-semibold tracking-widest text-brand-600 uppercase">{m.competition.name}</div>
         <h1 className="mt-2 text-5xl font-black">{m.teamA && m.teamB ? `${m.teamA} vs ${m.teamB}` : m.title}</h1>
         <p className="mt-2 text-xl text-slate-600">{fmtDateTime(m.startsAt)}{m.venue ? ` · ${m.venue}` : ""}</p>

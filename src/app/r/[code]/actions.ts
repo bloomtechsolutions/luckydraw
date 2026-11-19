@@ -9,7 +9,7 @@ import { verifyTicket } from "@/lib/tokens";
 export type RegisterResult =
   | { status: "idle" }
   | { status: "error"; message: string; values?: { staffId: string; name: string; department: string } }
-  | { status: "success"; already: boolean; staffId: string; name: string; department: string; registeredAt: string };
+  | { status: "success"; already: boolean; staffId: string; name: string; department: string; registeredAt: string; entryNo: number };
 
 export async function register(_prev: RegisterResult, formData: FormData): Promise<RegisterResult> {
   const code = String(formData.get("code") ?? "");
@@ -40,7 +40,7 @@ export async function register(_prev: RegisterResult, formData: FormData): Promi
 
   try {
     const r = await prisma.registration.create({ data: { matchId: match.id, staffId, name, department } });
-    return { status: "success", already: false, staffId, name, department, registeredAt: r.createdAt.toISOString() };
+    return { status: "success", already: false, staffId, name, department, registeredAt: r.createdAt.toISOString(), entryNo: await entryNumber(match.id, r.createdAt) };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       const existing = await prisma.registration.findUnique({ where: { matchId_staffId: { matchId: match.id, staffId } } });
@@ -52,10 +52,16 @@ export async function register(_prev: RegisterResult, formData: FormData): Promi
           name: existing.name,
           department: existing.department,
           registeredAt: existing.createdAt.toISOString(),
+          entryNo: await entryNumber(match.id, existing.createdAt),
         };
       }
     }
     console.error(e);
     return { status: "error", message: "Something went wrong. Please try again.", values };
   }
+}
+
+/** Position of this entry in the match (1 = first supporter to register). */
+async function entryNumber(matchId: string, createdAt: Date) {
+  return prisma.registration.count({ where: { matchId, createdAt: { lte: createdAt } } });
 }
