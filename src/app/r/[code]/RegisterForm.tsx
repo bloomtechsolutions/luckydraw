@@ -29,7 +29,9 @@ export default function RegisterForm({
           <Row k="Department" v={state.department} />
           <Row k="Registered" v={new Date(state.registeredAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })} />
         </dl>
-        <p className="mt-4 text-xs text-slate-500">Take a screenshot of this screen. Stay till the end for the draw!</p>
+        <p className="mt-5 rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700">
+          🎡 The draw will be taken live after the match ends.
+        </p>
       </div>
     );
   }
