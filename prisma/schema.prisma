@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A competition groups several matches (e.g. "Interoffice Netball 2026").
+model Competition {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  matches     Match[]
+}
+
+enum MatchStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+/// Each match is its own lucky-draw event with its own registrations and draw.
+model Match {
+  id            String        @id @default(cuid())
+  competitionId String
+  competition   Competition   @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  title         String
+  teamA         String?
+  teamB         String?
+  venue         String?
+  startsAt      DateTime
+  regOpensAt    DateTime
+  regClosesAt   DateTime
+  status        MatchStatus   @default(DRAFT)
+  /// Short public code used in the registration link (/r/<code>).
+  code          String        @unique
+  /// Per-match secret used to sign the rotating QR tokens.
+  qrSecret      String
+  /// When true the QR shown at the venue changes every minute.
+  rotatingQr    Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  registrations Registration[]
+  prizes        Prize[]
+  winners       Winner[]
+
+  @@index([competitionId])
+}
+
+model Registration {
+  id         String   @id @default(cuid())
+  matchId    String
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  /// Normalised (trimmed, upper-case) staff ID.
+  staffId    String
+  name       String
+  department String
+  createdAt  DateTime @default(now())
+  winners    Winner[]
+
+  @@unique([matchId, staffId])
+  @@index([staffId])
+}
+
+model Prize {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  name      String
+  quantity  Int      @default(1)
+  sortOrder Int      @default(0)
+  winners   Winner[]
+
+  @@index([matchId])
+}
+
+enum WinnerStatus {
+  VALID
+  REDRAWN
+}
+
+model Winner {
+  id             String       @id @default(cuid())
+  matchId        String
+  match          Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  prizeId        String
+  prize          Prize        @relation(fields: [prizeId], references: [id], onDelete: Cascade)
+  status         WinnerStatus @default(VALID)
+  drawnAt        DateTime     @default(now())
+
+  @@index([matchId])
+}
+
+/// Department list shown in the registration form dropdown.
+model Department {
+  id   String @id @default(cuid())
+  name String @unique
+}
