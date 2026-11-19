@@ -67,3 +67,15 @@ export function newMatchCode(length = 6) {
 export function newQrSecret() {
   return randomBytes(24).toString("base64url");
 }
+
+/**
+ * Secret key for the public venue-screen link (/screen/<code>?k=<key>).
+ * Derived from the match's QR secret, so "Invalidate old QR codes" also revokes old screen links.
+ */
+export function displayKey(match: Signable) {
+  return sign(match.qrSecret, `display:${match.code}`, 16);
+}
+
+export function verifyDisplayKey(match: Signable, key: string | undefined) {
+  return !!key && safeEqual(key, displayKey(match));
+}

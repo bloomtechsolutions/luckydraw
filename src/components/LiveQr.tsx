@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type QrData = { url: string; svg: string; rotating: boolean; secondsLeft: number | null; count: number; state: string };
 
-export default function LiveQr({ matchId, poster }: { matchId: string; poster: boolean }) {
+export default function LiveQr({ endpoint, poster }: { endpoint: string; poster: boolean }) {
   const [data, setData] = useState<QrData | null>(null);
   const [left, setLeft] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -12,9 +12,9 @@ export default function LiveQr({ matchId, poster }: { matchId: string; poster: b
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/matches/${matchId}/qr`, { cache: "no-store" });
-      if (res.status === 401) {
-        setError("Admin session expired. Please sign in again.");
+      const res = await fetch(endpoint, { cache: "no-store" });
+      if (res.status === 401 || res.status === 403) {
+        setError(res.status === 401 ? "Admin session expired. Please sign in again." : "This screen link is no longer valid. Copy a new one from the admin page.");
         return;
       }
       const d: QrData = await res.json();
@@ -28,7 +28,7 @@ export default function LiveQr({ matchId, poster }: { matchId: string; poster: b
       setError("Connection lost, retrying…");
       timer.current = setTimeout(load, 5000);
     }
-  }, [matchId]);
+  }, [endpoint]);
 
   useEffect(() => {
     load();

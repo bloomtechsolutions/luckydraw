@@ -11,6 +11,8 @@ import ConfirmButton from "@/components/ConfirmButton";
 import AutoRefresh from "@/components/AutoRefresh";
 import RegistrationsTable from "@/components/RegistrationsTable";
 import { ColumnBars, HorizontalBars } from "@/components/Charts";
+import CopyButton from "@/components/CopyButton";
+import { displayKey } from "@/lib/tokens";
 import { addPrize, deleteMatch, deletePrize, deleteWinner, rotateQrSecret, setMatchStatus } from "../../../actions";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +43,8 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
   const wonBy = new Map(validWinners.map((w) => [w.registrationId, w.prize.name]));
   const depts = tab === "stats" ? await departmentBreakdown({ matchId: m.id }) : [];
   const h = await headers();
-  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const origin = process.env.APP_URL?.replace(/\/$/, "") || `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const screenUrl = `${origin}/screen/${m.code}?k=${displayKey(m)}`;
 
   return (
     <div className="space-y-6">
@@ -70,6 +73,18 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
         )}
         <Link href={`/admin/matches/${m.id}/edit`} className="btn-secondary">✎ Edit</Link>
       </div>
+
+      <section className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-bold">📺 Venue screen link <span className="font-normal text-slate-500">(no login needed)</span></div>
+          <p className="text-xs text-slate-500">Open this on the TV, laptop or tablet at the court to show the live QR. Keep it private: anyone with this link can see the QR.</p>
+          <code className="mt-1.5 block truncate rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs">{screenUrl}</code>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <CopyButton text={screenUrl} label="Copy link" />
+          <a href={screenUrl} target="_blank" className="btn-secondary">Open</a>
+        </div>
+      </section>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Registrations" value={m.registrations.length} hint={m.registrations.length ? `Last at ${fmtDateTime(m.registrations[m.registrations.length - 1].createdAt)}` : undefined} />
@@ -179,7 +194,7 @@ export default async function MatchPage({ params, searchParams }: { params: Prom
               </>
             )}
             <div className="border-t border-slate-100 pt-3">
-              <ConfirmButton action={rotateQrSecret.bind(null, m.id)} confirm="Invalidate all QR codes/links issued so far for this match?" className="btn-secondary btn-sm">
+              <ConfirmButton action={rotateQrSecret.bind(null, m.id)} confirm="Invalidate all QR codes/links issued so far for this match? This also changes the venue screen link." className="btn-secondary btn-sm">
                 Invalidate old QR codes
               </ConfirmButton>
             </div>
